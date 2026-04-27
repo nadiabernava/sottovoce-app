@@ -1,0 +1,137 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Jost', sans-serif;
+    background-color: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.6;
+}
+
+header {
+    text-align: center;
+    padding: 2rem;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    font-weight: 300;
+    letter-spacing: -0.02em;
+}
+
+header p {
+    font-size: 0.9rem;
+    color: #999;
+}
+
+main {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+section {
+    margin-bottom: 3rem;
+}
+
+h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    font-weight: 400;
+}
+
+/* Check-in buttons */
+#checkin {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+}
+
+button {
+    padding: 1rem;
+    border: 2px solid #7fffd4;
+    background: white;
+    color: #1a1a1a;
+    font-size: 1rem;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    font-family: 'Jost', sans-serif;
+}
+
+button:hover {
+    background: #7fffd4;
+    color: white;
+}
+
+button:active {
+    transform: scale(0.98);
+}
+
+/* Task manager */
+#tasks input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    font-family: 'Jost', sans-serif;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+}
+
+#tasks ul {
+    list-style: none;
+}
+
+#tasks li {
+    padding: 0.75rem;
+    border-left: 3px solid #7fffd4;
+    margin-bottom: 0.5rem;
+    background: #fafafa;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#tasks li input[type="checkbox"] {
+    margin-right: 1rem;
+    cursor: pointer;
+}
+
+#tasks li.completed {
+    opacity: 0.6;
+    text-decoration: line-through;
+}
+
+footer {
+    text-align: center;
+    padding: 2rem;
+    font-size: 0.9rem;
+    color: #999;
+    border-top: 1px solid #e0e0e0;
+}
+
+footer a {
+    color: #7fffd4;
+    text-decoration: none;
+}
+
+footer a:hover {
+    text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    h1 {
+        font-size: 1.8rem;
+    }
+
+    main {
+        padding: 1rem 0.5rem;
+    }
+}
