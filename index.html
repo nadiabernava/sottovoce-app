@@ -1,39 +1,1110 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sottovoce — prendersi cura, per fare le cose</title>
-    <link rel="stylesheet" href="css/style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Sottovoce — Il task manager per la vita quotidiana</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Sans:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #EEF6F5;
+    --warm-white: #F4FAFA;
+    --sand: #C8E0DF;
+    --clay: #6BADA8;
+    --earth: #3D8A85;
+    --deep: #1A4A47;
+    --sage: #7AB8B4;
+    --mist: #B0D8D5;
+    --text: #1C3836;
+    --text-soft: #4A7A77;
+    --text-muted: #7AAAA7;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* SCREENS */
+  .screen {
+    display: none;
+    min-height: 100vh;
+    padding: 0;
+    animation: fadeIn 0.6s ease;
+  }
+  .screen.active { display: flex; flex-direction: column; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* WELCOME SCREEN */
+  #screen-welcome {
+    background: var(--deep);
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 48px 32px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  #screen-welcome::before {
+    content: '';
+    position: absolute;
+    top: -30%;
+    left: -20%;
+    width: 120%;
+    height: 80%;
+    background: radial-gradient(ellipse, rgba(107,173,168,0.2) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .welcome-tag {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--clay);
+    margin-bottom: 40px;
+    opacity: 0.8;
+  }
+
+  .welcome-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 52px;
+    font-weight: 300;
+    color: var(--warm-white);
+    letter-spacing: 0.05em;
+    line-height: 1.1;
+    margin-bottom: 16px;
+  }
+
+  .welcome-subtitle {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 18px;
+    color: var(--clay);
+    margin-bottom: 56px;
+    opacity: 0.9;
+  }
+
+  .welcome-text {
+    font-size: 15px;
+    line-height: 1.8;
+    color: rgba(250,247,242,0.75);
+    max-width: 380px;
+    margin: 0 auto 40px;
+    font-weight: 300;
+  }
+
+  .tagline {
+    font-size: 14px;
+    color: rgba(250,247,242,0.65);
+    line-height: 1.6;
+    max-width: 320px;
+    margin: 0 auto 56px;
+    font-style: italic;
+  }
+
+  .btn-primary {
+    display: inline-block;
+    padding: 16px 40px;
+    background: var(--clay);
+    color: var(--deep);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-radius: 2px;
+  }
+
+  .btn-primary:hover { background: var(--warm-white); }
+
+  .btn-ghost {
+    display: inline-block;
+    padding: 12px 24px;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    border: none;
+    cursor: pointer;
+    margin-top: 16px;
+    transition: color 0.2s;
+  }
+  .btn-ghost:hover { color: var(--text-soft); }
+
+  /* CHECKIN SCREEN */
+  #screen-checkin {
+    background: var(--warm-white);
+    padding: 0;
+  }
+
+  .checkin-header {
+    padding: 56px 32px 32px;
+    border-bottom: 1px solid var(--sand);
+  }
+
+  .time-greeting {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+  }
+
+  .checkin-question {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px;
+    font-weight: 300;
+    line-height: 1.35;
+    color: var(--deep);
+  }
+
+  .checkin-question em {
+    font-style: italic;
+    color: var(--earth);
+  }
+
+  .checkin-sub {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 10px;
+    font-weight: 300;
+    line-height: 1.6;
+  }
+
+  .checkin-question-phase {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  .checkin-question-phase.fade-out {
+    opacity: 0;
+    transform: translateY(-10px);
+    pointer-events: none;
+  }
+
+  .states-list {
+    padding: 24px 32px 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex: 1;
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity 0.7s ease 0.3s, transform 0.7s ease 0.3s;
+  }
+  .states-list.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .state-btn {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 18px 20px;
+    background: var(--cream);
+    border: 1.5px solid transparent;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    text-align: left;
+  }
+
+  .state-btn:hover, .state-btn:active {
+    border-color: var(--clay);
+    background: var(--warm-white);
+    transform: translateX(3px);
+  }
+
+  .state-icon {
+    font-size: 22px;
+    width: 32px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  .state-label {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 18px;
+    font-weight: 400;
+    color: var(--deep);
+    display: block;
+    line-height: 1.2;
+  }
+
+  .state-desc {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 2px;
+    display: block;
+    font-weight: 300;
+  }
+
+  /* ACTIVATION SCREEN */
+  #screen-activation {
+    background: var(--warm-white);
+  }
+
+  .activation-header {
+    padding: 48px 32px 28px;
+  }
+
+  .back-btn {
+    font-size: 12px;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    margin-bottom: 24px;
+    display: block;
+    transition: color 0.2s;
+  }
+  .back-btn:hover { color: var(--earth); }
+
+  .activation-state {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--clay);
+    margin-bottom: 12px;
+  }
+
+  .activation-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 26px;
+    font-weight: 300;
+    color: var(--deep);
+    line-height: 1.4;
+  }
+
+  .activation-body {
+    padding: 0 32px 40px;
+    flex: 1;
+  }
+
+  .audio-player {
+    background: var(--cream);
+    border-radius: 8px;
+    padding: 24px;
+    margin: 32px 0 28px;
+    border: 1px solid var(--sand);
+  }
+
+  .audio-label {
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--clay);
+    margin-bottom: 12px;
+    display: block;
+  }
+
+  audio {
+    width: 100%;
+    margin-bottom: 12px;
+    border-radius: 4px;
+  }
+
+  .audio-controls {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-top: 12px;
+  }
+
+  .audio-control-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .audio-control-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    min-width: 40px;
+  }
+
+  input[type="range"] {
+    flex: 1;
+    min-width: 80px;
+  }
+
+  .activation-buttons {
+    display: flex;
+    gap: 12px;
+    margin-top: 32px;
+  }
+
+  .activation-btn {
+    flex: 1;
+    padding: 14px 20px;
+    border: 1.5px solid var(--sand);
+    background: var(--warm-white);
+    color: var(--deep);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s;
+    letter-spacing: 0.08em;
+  }
+
+  .activation-btn:hover {
+    border-color: var(--clay);
+    background: var(--cream);
+  }
+
+  .activation-btn.primary {
+    background: var(--clay);
+    color: var(--deep);
+    border-color: var(--clay);
+  }
+
+  /* GOOD STATE SCREEN */
+  #screen-good {
+    background: var(--warm-white);
+    padding: 48px 32px;
+    flex-direction: column;
+  }
+
+  .good-header {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+
+  .good-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 32px;
+    font-weight: 300;
+    color: var(--deep);
+    margin-bottom: 8px;
+  }
+
+  .good-sub {
+    font-size: 14px;
+    color: var(--text-muted);
+  }
+
+  .good-tasks-area {
+    flex: 1;
+  }
+
+  .suggestion-label {
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--clay);
+    margin-bottom: 16px;
+  }
+
+  .suggestion-card {
+    background: var(--cream);
+    border: 1px solid var(--sand);
+    border-radius: 6px;
+    padding: 18px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .suggestion-card:hover {
+    border-color: var(--clay);
+    background: white;
+    transform: translateY(-2px);
+  }
+
+  .suggestion-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 18px;
+    color: var(--deep);
+    margin-bottom: 8px;
+  }
+
+  .suggestion-meta {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .task-badge {
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 12px;
+    background: var(--sand);
+    color: var(--earth);
+    letter-spacing: 0.05em;
+  }
+
+  .empty-tasks {
+    text-align: center;
+    padding: 48px 24px;
+  }
+
+  .empty-tasks-text {
+    font-size: 16px;
+    color: var(--text-muted);
+    line-height: 1.8;
+    margin-bottom: 24px;
+  }
+
+  /* TASK SCREEN */
+  #screen-tasks {
+    background: var(--warm-white);
+    padding: 0;
+  }
+
+  .tasks-header {
+    padding: 48px 32px 28px;
+    border-bottom: 1px solid var(--sand);
+  }
+
+  .tasks-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 32px;
+    font-weight: 300;
+    color: var(--deep);
+  }
+
+  .tasks-sub {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 6px;
+  }
+
+  .tasks-categories {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--sand);
+    padding: 0 32px;
+  }
+
+  .cat-tab {
+    flex: 1;
+    padding: 16px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text-muted);
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    text-align: center;
+  }
+
+  .cat-tab.active {
+    color: var(--deep);
+    border-bottom-color: var(--clay);
+  }
+
+  .tasks-body {
+    padding: 24px 32px;
+    flex: 1;
+  }
+
+  .task-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 8px;
+  }
+
+  .task-item:hover {
+    background: var(--cream);
+  }
+
+  .task-item.done {
+    opacity: 0.5;
+  }
+
+  .task-item.done .task-name {
+    text-decoration: line-through;
+    color: var(--text-muted);
+  }
+
+  .task-check {
+    width: 20px;
+    height: 20px;
+    border: 1.5px solid var(--clay);
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 12px;
+    color: var(--deep);
+    background: white;
+  }
+
+  .task-item.done .task-check {
+    background: var(--clay);
+    border-color: var(--clay);
+    color: white;
+  }
+
+  .task-content {
+    flex: 1;
+  }
+
+  .task-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 16px;
+    color: var(--deep);
+    margin-bottom: 6px;
+  }
+
+  .task-meta {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .badge-basso { background: rgba(122,171,170,0.1); color: var(--clay); }
+  .badge-medio { background: rgba(107,173,168,0.15); color: var(--earth); }
+  .badge-alto { background: rgba(107,173,168,0.2); color: var(--deep); }
+  .badge-time { background: var(--sand); color: var(--earth); }
+
+  .add-task-area {
+    padding: 24px 32px 32px;
+    border-top: 1px solid var(--sand);
+  }
+
+  .add-task-input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--sand);
+    border-radius: 4px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    resize: vertical;
+    margin-bottom: 8px;
+  }
+
+  .add-task-input::placeholder {
+    color: var(--text-muted);
+  }
+
+  .add-task-hint {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+    letter-spacing: 0.05em;
+  }
+
+  .add-task-btn {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    background: var(--clay);
+    color: var(--deep);
+    border: none;
+    border-radius: 4px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.08em;
+  }
+
+  .add-task-btn:hover {
+    background: var(--sage);
+  }
+
+  .bottom-nav {
+    display: flex;
+    border-top: 1px solid var(--sand);
+    background: var(--warm-white);
+  }
+
+  .nav-item {
+    flex: 1;
+    padding: 12px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-muted);
+    font-size: 11px;
+    transition: color 0.2s;
+    letter-spacing: 0.08em;
+  }
+
+  .nav-item.active {
+    color: var(--clay);
+  }
+
+  .nav-icon {
+    font-size: 18px;
+  }
+
+  /* STAY HERE SCREEN */
+  #screen-stay {
+    background: var(--warm-white);
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 48px 40px;
+  }
+
+  .stay-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 36px;
+    font-weight: 300;
+    color: var(--deep);
+    margin-bottom: 16px;
+    line-height: 1.3;
+  }
+
+  .stay-sub {
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.8;
+    margin-bottom: 32px;
+  }
+
+  .btn-ghost-light {
+    display: inline-block;
+    padding: 12px 24px;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    border: none;
+    cursor: pointer;
+    transition: color 0.2s;
+  }
+  .btn-ghost-light:hover { color: var(--earth); }
+
+  /* LOADING */
+  #loading {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+  }
+
+  #loading.visible {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(107,173,168,0.2);
+    border-top-color: var(--clay);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+</style>
 </head>
 <body>
-    <header>
-        <h1>Sottovoce</h1>
-        <p>v1.0-beta</p>
-    </header>
 
-    <main>
-        <section id="checkin">
-    <h2>Come stai?</h2>
-    <div class="checkin-buttons">
-        <button class="checkin-btn" data-state="bene">✓ Sto bene, sono presente</button>
-        <button class="checkin-btn" data-state="stanca">⏳ Sono stanca/o, ma ce la faccio</button>
-        <button class="checkin-btn" data-state="agitata">⚡ Sono agitata/o, non riesco a fermarmi</button>
-        <button class="checkin-btn" data-state="sopraffatta">💧 Sono sopraffatta/o</button>
-        <button class="checkin-btn" data-state="spenta">● Sono spenta/o — non riesco a sentire niente</button>
+<!-- SCREEN 1: WELCOME -->
+<div class="screen active" id="screen-welcome">
+  <div style="position:relative; z-index:10;">
+    <div class="welcome-tag">v1.0-beta</div>
+    <h1 class="welcome-title">Sottovoce</h1>
+    <div class="welcome-subtitle">Prendersi cura, per fare le cose</div>
+    <div class="welcome-text">Il task manager per la vita quotidiana.</div>
+    <div class="tagline">Con il sistema nervoso dalla tua parte.</div>
+    <button class="btn-primary" onclick="goToCheckin()">Inizia →</button>
+  </div>
+</div>
+
+<!-- SCREEN 2: CHECK-IN -->
+<div class="screen" id="screen-checkin">
+  <div class="checkin-header">
+    <div class="time-greeting" id="time-greeting">Buongiorno</div>
+    <div id="checkin-question-phase" class="checkin-question-phase">
+      <div class="checkin-question">Come stai<em>,</em> adesso?</div>
+      <div class="checkin-sub">Raccontamelo con uno di questi.</div>
     </div>
-</section>
+  </div>
 
-        <section id="tasks">
-            <h2>Farò tutto piano piano</h2>
-            <!-- Task manager va qui -->
-        </section>
-    </main>
+  <div class="states-list" id="states-list">
+    <button class="state-btn" onclick="selectState('bene')">
+      <span class="state-icon">✓</span>
+      <div>
+        <span class="state-label">Sto bene, sono presente</span>
+        <span class="state-desc">Il sistema nervoso è regolato</span>
+      </div>
+    </button>
+    <button class="state-btn" onclick="selectState('stanca')">
+      <span class="state-icon">⏳</span>
+      <div>
+        <span class="state-label">Sono stanca/o, ma ce la faccio</span>
+        <span class="state-desc">Ho bisogno di un piccolo reset</span>
+      </div>
+    </button>
+    <button class="state-btn" onclick="selectState('agitata')">
+      <span class="state-icon">⚡</span>
+      <div>
+        <span class="state-label">Sono agitata/o, non riesco a fermarmi</span>
+        <span class="state-desc">Il corpo ha bisogno di muoversi</span>
+      </div>
+    </button>
+    <button class="state-btn" onclick="selectState('sopraffatta')">
+      <span class="state-icon">💧</span>
+      <div>
+        <span class="state-label">Sono sopraffatta/o</span>
+        <span class="state-desc">Troppo, tutto insieme</span>
+      </div>
+    </button>
+    <button class="state-btn" onclick="selectState('spenta')">
+      <span class="state-icon">●</span>
+      <div>
+        <span class="state-label">Sono spenta/o — non riesco a sentire niente</span>
+        <span class="state-desc">Silenzio, contatto, solo questo</span>
+      </div>
+    </button>
+  </div>
+</div>
 
-    <footer>
-        <p>© Nadia Bernava | <a href="https://nadiabernava.com">nadiabernava.com</a></p>
-    </footer>
+<!-- SCREEN 3: ACTIVATION -->
+<div class="screen" id="screen-activation">
+  <div class="activation-header">
+    <button class="back-btn" onclick="goToCheckin()">← Indietro</button>
+    <div class="activation-state" id="act-state-label"></div>
+    <h2 class="activation-title" id="act-title"></h2>
+  </div>
+  <div class="activation-body">
+    <div class="audio-player">
+      <span class="audio-label">La tua voce — Nadia</span>
+      <audio id="act-audio" controls>
+        <source src="" type="audio/mpeg">
+      </audio>
+      <div class="audio-controls">
+        <div class="audio-control-group">
+          <label class="audio-control-label">Volume</label>
+          <input type="range" min="0" max="100" value="100" id="vol-slider" onchange="setVolume()">
+        </div>
+        <div class="audio-control-group">
+          <label class="audio-control-label">Velocità</label>
+          <select id="speed-select" onchange="setSpeed()">
+            <option value="0.75">0.75x</option>
+            <option value="1" selected>1x</option>
+            <option value="1.25">1.25x</option>
+            <option value="1.5">1.5x</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div id="act-text" style="font-size:15px; line-height:1.8; color:var(--text-soft); white-space:pre-line; margin-bottom:32px;"></div>
+    <div class="activation-buttons">
+      <button class="activation-btn" onclick="afterActivation('peggio')">Non è passato</button>
+      <button class="activation-btn" onclick="afterActivation('uguale')">È uguale</button>
+      <button class="activation-btn primary" onclick="afterActivation('meglio')">Sto meglio →</button>
+    </div>
+  </div>
+</div>
 
-    <script src="js/app.js"></script>
+<!-- SCREEN 4: GOOD STATE -->
+<div class="screen" id="screen-good">
+  <div class="good-header">
+    <div class="good-title">Sei presente.</div>
+    <div class="good-sub">Sfruttiamo questo momento.</div>
+  </div>
+  <div class="good-tasks-area" id="good-tasks-area"></div>
+  <div style="text-align:center; margin-top:32px;">
+    <button class="btn-primary" onclick="showScreen('screen-tasks')">Vai ai compiti</button>
+  </div>
+</div>
+
+<!-- SCREEN 5: TASKS -->
+<div class="screen" id="screen-tasks">
+  <div class="tasks-header">
+    <div class="tasks-title">Le tue cose</div>
+    <div class="tasks-sub">una alla volta, quando sei pronta/o</div>
+  </div>
+  <div class="tasks-categories">
+    <button class="cat-tab active" onclick="switchCat('me', this)">Per me</button>
+    <button class="cat-tab" onclick="switchCat('amore', this)">Per chi amo</button>
+    <button class="cat-tab" onclick="switchCat('casa', this)">Per la casa</button>
+  </div>
+  <div class="tasks-body" id="tasks-list"></div>
+  <div class="add-task-area">
+    <textarea class="add-task-input" id="new-task-input" rows="2" placeholder="scrivi pure in modo disordinato, ci penso io..."></textarea>
+    <div class="add-task-hint">Aggiungi a mano — non serve formattazione.</div>
+    <button class="add-task-btn" onclick="addTask()">Aggiungi</button>
+  </div>
+  <div class="bottom-nav">
+    <button class="nav-item" onclick="showScreen('screen-checkin')">
+      <span class="nav-icon">○</span>
+      <span class="nav-label">Check-in</span>
+    </button>
+    <button class="nav-item active">
+      <span class="nav-icon">◇</span>
+      <span class="nav-label">Compiti</span>
+    </button>
+    <button class="nav-item" onclick="showScreen('screen-stay')">
+      <span class="nav-icon">◌</span>
+      <span class="nav-label">Spazio sacro</span>
+    </button>
+  </div>
+</div>
+
+<!-- SCREEN 6: STAY HERE -->
+<div class="screen" id="screen-stay">
+  <div class="stay-text">Resto qui,<br>a disposizione.</div>
+  <div class="stay-sub">Non devi fare niente.<br>Sono qui quando vuoi tornare.</div>
+  <button class="btn-ghost-light" onclick="showScreen('screen-checkin')">torna al check-in</button>
+</div>
+
+<!-- LOADING -->
+<div id="loading">
+  <div class="spinner"></div>
+</div>
+
+<script>
+// --- STATE ---
+let currentCat = 'me';
+let tasks = {
+  me: [],
+  amore: [],
+  casa: []
+};
+
+// --- AUDIO MAPPING ---
+const audioMap = {
+  stanca: 'audio/audio-5a-stanca.mp3',
+  agitata: 'audio/audio-5b-agitata.mp3',
+  sopraffatta: 'audio/audio-5c-sopraffatta.mp3',
+  spenta: 'audio/audio-5d-spenta.mp3'
+};
+
+const activations = {
+  stanca: {
+    label: 'Sono stanca/o, ma ce la faccio',
+    title: 'Un piccolo momento per te.\nPrima di tutto — il corpo.',
+    text: 'Ascolta la voce.\nSenti come sta il tuo corpo adesso.'
+  },
+  agitata: {
+    label: 'Sono agitata/o, non riesco a fermarmi',
+    title: 'Va bene così.\nRestiamo insieme un momento.',
+    text: 'Ascolta la voce.\nLascia che il corpo si muova naturalmente.'
+  },
+  sopraffatta: {
+    label: 'Sono sopraffatta/o',
+    title: 'Non devi fare niente adesso.',
+    text: 'Ascolta la voce.\nSenza fretta, senza aspettative.'
+  },
+  spenta: {
+    label: 'Sono spenta/o — non riesco a sentire niente',
+    title: 'Silenzio.\nSono qui con te.',
+    text: 'Ascolta la voce.\nSoltanto contatto, soltanto respiro.'
+  }
+};
+
+// --- GREETINGS ---
+function setGreeting() {
+  const h = new Date().getHours();
+  const el = document.getElementById('time-greeting');
+  if (h < 12) el.textContent = 'Buongiorno';
+  else if (h < 18) el.textContent = 'Buon pomeriggio';
+  else el.textContent = 'Buonasera';
+}
+
+// --- NAVIGATION ---
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function goToCheckin() {
+  setGreeting();
+  const phase = document.getElementById('checkin-question-phase');
+  const list = document.getElementById('states-list');
+  if (phase) phase.classList.remove('fade-out');
+  if (list) list.classList.remove('visible');
+  showScreen('screen-checkin');
+  setTimeout(() => {
+    if (phase) phase.classList.add('fade-out');
+    setTimeout(() => {
+      if (list) list.classList.add('visible');
+    }, 600);
+  }, 2500);
+}
+
+// --- CHECK-IN ---
+function selectState(state) {
+  if (state === 'bene') {
+    renderGoodTasks();
+    showScreen('screen-good');
+  } else {
+    const a = activations[state];
+    const audio = document.getElementById('act-audio');
+    audio.src = audioMap[state];
+    
+    document.getElementById('act-state-label').textContent = a.label;
+    document.getElementById('act-title').textContent = a.title;
+    document.getElementById('act-text').textContent = a.text;
+    showScreen('screen-activation');
+  }
+}
+
+function afterActivation(result) {
+  if (result === 'meglio') {
+    renderGoodTasks();
+    showScreen('screen-good');
+  } else if (result === 'peggio') {
+    showScreen('screen-stay');
+  } else {
+    showScreen('screen-stay');
+  }
+}
+
+// --- AUDIO CONTROLS ---
+function setVolume() {
+  const audio = document.getElementById('act-audio');
+  const vol = document.getElementById('vol-slider').value / 100;
+  audio.volume = vol;
+}
+
+function setSpeed() {
+  const audio = document.getElementById('act-audio');
+  const speed = document.getElementById('speed-select').value;
+  audio.playbackRate = parseFloat(speed);
+}
+
+// --- GOOD STATE TASKS ---
+function renderGoodTasks() {
+  const area = document.getElementById('good-tasks-area');
+  const allTasks = [...tasks.me, ...tasks.amore, ...tasks.casa].filter(t => !t.done);
+  
+  if (allTasks.length === 0) {
+    area.innerHTML = `
+      <div class="empty-tasks">
+        <div class="empty-tasks-text">Non c'è ancora niente qui.<br>Vuoi lasciarmi qualche compito<br>da tenere in mente per te?</div>
+      </div>`;
+    return;
+  }
+
+  const light = allTasks.filter(t => t.load === 'basso');
+  const toShow = light.length > 0 ? light.slice(0,2) : allTasks.slice(0,2);
+
+  area.innerHTML = `<div class="suggestion-label">Potresti fare una di queste</div>`;
+  toShow.forEach(task => {
+    area.innerHTML += `
+      <div class="suggestion-card" onclick="startTask('${task.id}')">
+        <div class="suggestion-name">${task.name}</div>
+        <div class="suggestion-meta">
+          <span class="task-badge badge-${task.load}">${task.load}</span>
+          <span class="task-badge badge-time">${task.duration}</span>
+        </div>
+      </div>`;
+  });
+}
+
+function startTask(id) {
+  showScreen('screen-tasks');
+}
+
+// --- TASK MANAGER ---
+function switchCat(cat, btn) {
+  currentCat = cat;
+  document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  renderTasks();
+}
+
+function renderTasks() {
+  const list = document.getElementById('tasks-list');
+  const catTasks = tasks[currentCat];
+  
+  if (catTasks.length === 0) {
+    list.innerHTML = `
+      <div class="empty-tasks">
+        <div class="empty-tasks-text" style="font-size:16px; color: var(--text-muted);">
+          Nessun compito qui.<br>Scrivili sotto, anche in disordine.
+        </div>
+      </div>`;
+    return;
+  }
+
+  list.innerHTML = catTasks.map(t => `
+    <div class="task-item ${t.done ? 'done' : ''}" onclick="toggleTask('${t.id}')">
+      <div class="task-check">${t.done ? '✓' : ''}</div>
+      <div class="task-content">
+        <div class="task-name">${t.name}</div>
+        <div class="task-meta">
+          <span class="task-badge badge-${t.load}">${t.load}</span>
+          <span class="task-badge badge-time">${t.duration}</span>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function toggleTask(id) {
+  for (const cat in tasks) {
+    const t = tasks[cat].find(t => t.id === id);
+    if (t) { t.done = !t.done; break; }
+  }
+  renderTasks();
+}
+
+function addTask() {
+  const input = document.getElementById('new-task-input');
+  const raw = input.value.trim();
+  if (!raw) return;
+
+  input.value = '';
+
+  // Simple version: no AI, just add manually
+  const newTask = {
+    id: Date.now().toString(),
+    name: raw,
+    duration: 'breve',
+    load: 'medio',
+    done: false
+  };
+
+  tasks[currentCat].push(newTask);
+  renderTasks();
+}
+
+// --- INIT ---
+setGreeting();
+renderTasks();
+</script>
 </body>
 </html>
