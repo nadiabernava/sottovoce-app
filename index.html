@@ -350,6 +350,14 @@
     display: flex;
     gap: 12px;
     margin-top: 32px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s ease;
+  }
+
+  .activation-buttons.visible {
+    opacity: 1;
+    pointer-events: auto;
   }
 
   .activation-btn {
@@ -741,7 +749,6 @@
 <!-- SCREEN 1: WELCOME -->
 <div class="screen active" id="screen-welcome">
   <div style="position:relative; z-index:10;">
-    <div class="welcome-tag">v1.0-beta</div>
     <h1 class="welcome-title">Sottovoce</h1>
     <div class="welcome-subtitle">Prendersi cura, per fare le cose</div>
     <div class="welcome-text">Il task manager per la vita quotidiana.</div>
@@ -808,7 +815,7 @@
   </div>
   <div class="activation-body">
     <div class="audio-player">
-      <span class="audio-label">La tua voce — Nadia</span>
+      <span class="audio-label">Fai partire l'audio quando sei pronta/o</span>
       <audio id="act-audio" controls>
         <source src="" type="audio/mpeg">
       </audio>
@@ -829,7 +836,7 @@
       </div>
     </div>
     <div id="act-text" style="font-size:15px; line-height:1.8; color:var(--text-soft); white-space:pre-line; margin-bottom:32px;"></div>
-    <div class="activation-buttons">
+    <div class="activation-buttons" id="act-buttons">
       <button class="activation-btn" onclick="afterActivation('peggio')">Non è passato</button>
       <button class="activation-btn" onclick="afterActivation('uguale')">È uguale</button>
       <button class="activation-btn primary" onclick="afterActivation('meglio')">Sto meglio →</button>
@@ -853,7 +860,7 @@
 <div class="screen" id="screen-tasks">
   <div class="tasks-header">
     <div class="tasks-title">Le tue cose</div>
-    <div class="tasks-sub">una alla volta, quando sei pronta/o</div>
+    <div class="tasks-sub">una alla volta</div>
   </div>
   <div class="tasks-categories">
     <button class="cat-tab active" onclick="switchCat('me', this)">Per me</button>
@@ -973,12 +980,24 @@ function selectState(state) {
   } else {
     const a = activations[state];
     const audio = document.getElementById('act-audio');
+    const buttons = document.getElementById('act-buttons');
+    
+    // Hide buttons initially
+    buttons.classList.remove('visible');
+    
     audio.src = audioMap[state];
     
     document.getElementById('act-state-label').textContent = a.label;
     document.getElementById('act-title').textContent = a.title;
     document.getElementById('act-text').textContent = a.text;
     showScreen('screen-activation');
+    
+    // Auto-play and show buttons when audio ends
+    audio.play().catch(err => console.log('Audio play failed:', err));
+    
+    audio.onended = function() {
+      buttons.classList.add('visible');
+    };
   }
 }
 
@@ -1089,7 +1108,6 @@ function addTask() {
 
   input.value = '';
 
-  // Simple version: no AI, just add manually
   const newTask = {
     id: Date.now().toString(),
     name: raw,
